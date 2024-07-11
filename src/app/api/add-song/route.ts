@@ -3,13 +3,11 @@ import { NextResponse } from 'next/server';
  
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const date = searchParams.get('date');
-  const venue = searchParams.get('venue');
-  const city = searchParams.get('city');
+  const song = searchParams.get('song');
   
   try {
-    if (!date || !venue || !city) throw new Error('data required');
-    await sql`INSERT INTO Shows (date, venue, city) VALUES (${date}, ${venue}, ${city});`;
+    if (!song) throw new Error('data required');
+    await sql`INSERT INTO Songs (Song_Name) VALUES (${song});`;
   } catch (error) {
     console.log('error', error)
     return NextResponse.json({ error }, { status: 500 });
