@@ -8,7 +8,9 @@ export async function GET(request: Request) {
         id SERIAL PRIMARY KEY,
         date DATE,
         venue varchar(255),
-        city varchar(255)
+        city varchar(255), 
+        state varchar(255),
+        notes varchar(255) 
       );`;
     return NextResponse.json({ result }, { status: 200 });
   } catch (error) {
