@@ -5,9 +5,7 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const song = searchParams.get('song');
   const showVenue = searchParams.get('venue'); 
-  // const showVenue = 'cervantes'; 
   const showDate = searchParams.get('date'); 
-  // const showDate = '2024-01-26'; 
   let song_id;
   let show_id;
 
@@ -25,7 +23,6 @@ export async function GET(request: Request) {
   }
 
   try {
-    console.log('songId', song_id); 
     if (!show_id || !song_id) throw new Error('data required');
     await sql`INSERT INTO setlists (show_id, song_id) VALUES (${show_id}, ${song_id});`;
   } catch (error) {

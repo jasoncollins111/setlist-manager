@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
  
 export async function GET(request: Request) {
   try {
-    await sql`DROP TABLE shows`;
+    await sql`DROP TABLE if exists shows cascade`;
     const result = await sql`CREATE TABLE Shows ( 
         id SERIAL PRIMARY KEY,
         date DATE,

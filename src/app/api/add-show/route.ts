@@ -1,15 +1,13 @@
 import { sql } from '@vercel/postgres';
 import { NextResponse } from 'next/server';
  
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const date = searchParams.get('date');
-  const venue = searchParams.get('venue');
-  const city = searchParams.get('city');
-  
+export async function POST(request: Request) {
+  const body = await request.json();
+  const { venue, city, state, notes, date } = body;
+
   try {
-    if (!date || !venue || !city) throw new Error('data required');
-    await sql`INSERT INTO Shows (date, venue, city) VALUES (${date}, ${venue}, ${city});`;
+    if (!date || !venue || !city || !state) throw new Error('data required');
+    await sql`INSERT INTO Shows (date, venue, city, state, notes) VALUES (${date}, ${venue}, ${city}, ${state}, ${notes});`;
   } catch (error) {
     console.log('error', error)
     return NextResponse.json({ error }, { status: 500 });

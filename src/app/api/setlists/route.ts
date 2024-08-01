@@ -3,6 +3,8 @@ import { NextResponse } from 'next/server';
  
 export async function GET(request: Request) {
   try {
+    await sql`DROP TABLE setlists`;
+    
     const result =
       await sql`CREATE TABLE setlists (
         show_id INTEGER REFERENCES shows(id), 
