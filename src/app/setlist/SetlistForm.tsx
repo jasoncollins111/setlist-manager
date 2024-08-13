@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Box, FormControl } from '@mui/material';
 import {Checkbox, Button, Dropdown, Input, Menu, MenuItem, MenuButton, Textarea, Typography} from '@mui/joy';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -9,6 +9,7 @@ import {Dayjs} from 'dayjs';
 import axios from 'axios';
 
 export default function SetlistForm() {
+  
   const [venue, setVenue] = useState<string>('');
   const [city, setCity] = useState<string>('');
   const [state, setState] = useState<string>('');
@@ -16,6 +17,8 @@ export default function SetlistForm() {
   const [date, setDate] = useState<Dayjs | null>(null);
   const [song, setSong] = useState<string>('');
   const [songList, setSongList] = useState<Array<any>>([]);
+  const [setlist, setSetlist] = useState<Array<any>>([]);
+  const [menuOpen, setMenuOpen] = useState<boolean>(false);
 
   useEffect(() => {
     getSongs();
@@ -28,8 +31,9 @@ export default function SetlistForm() {
   }
 
   async function submitShow(){
-    if (venue && city && state && notes && date) {
+    if (venue && city && state && notes && date && setlist.length > 0) {
       axios.post("/api/add-show", { venue, city, state, notes, date });
+      axios.post('/api/add-setlist', { setlist });
     }
   }
 
@@ -44,6 +48,20 @@ export default function SetlistForm() {
     }
   }
 
+  const handleOpenChange = useCallback(
+    (event: React.SyntheticEvent | null, isOpen: boolean) => {
+      if (isOpen) {
+        setMenuOpen(isOpen);
+      }
+    },
+    [],
+  );
+
+  async function addSongToSetlist(event: any) {
+    const { value, checked } = event.target;
+    setSetlist([...setlist, {value, checked}])
+  }
+
   return (
     <Box>
       <Typography level="h1">Add Setlist</Typography>
@@ -55,18 +73,27 @@ export default function SetlistForm() {
           <DatePicker value={date} onChange={(newDate) => setDate(newDate)} />
         </LocalizationProvider>
         <Textarea minRows={6} placeholder="Notes" onChange={e => setNotes(e.target.value)}/>
-        <Dropdown>
+        <Dropdown open={menuOpen} onOpenChange={handleOpenChange}>
             <MenuButton>
               Songs
             </MenuButton>
-          <Menu>
+          <Menu >
             {songList.map((song, idx) => {
               return (
                 <MenuItem key={idx}>
-                  <Checkbox label={song.song_name} value={song.song_name} key={idx} />
+                  <Checkbox
+                    label={song.song_name}
+                    value={song.song_name}
+                    key={idx}
+                    onChange={addSongToSetlist}
+                    checked={setlist.some(setlistSong => {
+                      return setlistSong.value == song.song_name && setlistSong.checked == true
+                    })}
+                  />
                 </MenuItem>
               )
             })}
+          <Button onClick={()=>setMenuOpen(false)}>Close</Button>
           </Menu>
         </Dropdown>
         <Button onClick={submitShow}>Submit</Button>
