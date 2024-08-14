@@ -27,13 +27,14 @@ export default function SetlistForm() {
   async function getSongs() {
     const result = await axios.get('/api/songs');
     const songs = result?.data?.result?.rows;
+    console.log('songs', songs)
     setSongList(songs);
   }
 
   async function submitShow(){
     if (venue && city && state && notes && date && setlist.length > 0) {
       axios.post("/api/add-show", { venue, city, state, notes, date });
-      axios.post('/api/add-setlist', { setlist });
+      axios.post('/api/add-setlist', { setlist, venue, date });
     }
   }
 
@@ -58,8 +59,8 @@ export default function SetlistForm() {
   );
 
   async function addSongToSetlist(event: any) {
-    const { value, checked } = event.target;
-    setSetlist([...setlist, {value, checked}])
+    const { value } = event.target;
+    setSetlist([...setlist, {value}])
   }
 
   return (
@@ -78,16 +79,16 @@ export default function SetlistForm() {
               Songs
             </MenuButton>
           <Menu >
-            {songList.map((song, idx) => {
+            {songList.map((item, idx) => {
               return (
                 <MenuItem key={idx}>
                   <Checkbox
-                    label={song.song_name}
-                    value={song.song_name}
+                    label={item.song}
+                    value={item.song}
                     key={idx}
                     onChange={addSongToSetlist}
                     checked={setlist.some(setlistSong => {
-                      return setlistSong.value == song.song_name && setlistSong.checked == true
+                      return setlistSong.value == item.song;
                     })}
                   />
                 </MenuItem>
