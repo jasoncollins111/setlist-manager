@@ -2,7 +2,22 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { Box, FormControl } from '@mui/material';
-import {Checkbox, Button, Dropdown, Input, Menu, MenuItem, MenuButton, Textarea, Typography} from '@mui/joy';
+import {
+  Checkbox,
+  Button,
+  Dropdown,
+  Input,
+  List,
+  ListItem,
+  ListItemButton,
+  ListSubheader,
+  Menu,
+  MenuItem,
+  MenuButton,
+  Sheet,
+  Textarea,
+  Typography
+} from '@mui/joy';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import {Dayjs} from 'dayjs';
@@ -18,10 +33,12 @@ export default function SetlistForm() {
   const [song, setSong] = useState<string>('');
   const [songList, setSongList] = useState<Array<any>>([]);
   const [setlist, setSetlist] = useState<Array<any>>([]);
+  const [showList, setShowList] = useState<Array<any>>([]);
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
 
   useEffect(() => {
     getSongs();
+    getShows();
   },[])
 
   async function getSongs() {
@@ -31,10 +48,32 @@ export default function SetlistForm() {
     setSongList(songs);
   }
 
+  async function getShows() {
+    const result = await axios.get('/api/shows');
+    const shows = result?.data?.result?.rows;
+    console.log('shows', shows)
+    setShowList(shows);
+  }
+
   async function submitShow(){
     if (venue && city && state && notes && date && setlist.length > 0) {
       axios.post("/api/add-show", { venue, city, state, notes, date });
       axios.post('/api/add-setlist', { setlist, venue, date });
+    }
+  }
+
+  async function getSetlist(show: any) {
+    console.log('getsetlist')
+    const { id } = show;
+    try {
+      const setlist = await axios.get("/api/get-setlist", {
+        params: {
+          id
+        }
+      });
+      setSong('');
+    } catch (error) {
+      console.log('error', error);
     }
   }
 
@@ -65,6 +104,28 @@ export default function SetlistForm() {
 
   return (
     <Box>
+       <Sheet
+      variant="outlined"
+      sx={{
+        width: 320,
+        maxHeight: 300,
+        overflow: 'auto',
+        borderRadius: 'sm',
+      }}
+    >
+      <List>
+        <ListItem nested>
+          <ListSubheader sticky>Shows</ListSubheader>
+          <List>
+            {showList.map((show, idx) => (
+              <ListItem key={idx}>
+                <ListItemButton onClick={()=>getSetlist(show)}>{show.date}</ListItemButton>
+              </ListItem>
+            ))}
+          </List>
+        </ListItem>
+      </List>
+    </Sheet>
       <Typography level="h1">Add Setlist</Typography>
       <FormControl>
         <Input placeholder="Venue" onChange={e => setVenue(e.target.value)}/> 
